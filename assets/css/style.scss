@@ -1,0 +1,27 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* --- התאמת כיוון לעברית (RTL) --- */
+body {
+  direction: rtl;
+  text-align: right;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- הצבעים של הקהילה שלך --- */
+:root {
+  --primary-color: #007acc;   /* כאן נשים את הצבע הראשי של הקהילה */
+  --header-bg: #1a1a24;       /* צבע הרקע של הכותרת/באנר */
+  --text-color: #24292f;      /* צבע הטקסט */
+}
+
+/* החלת הצבעים על קישורים וכותרות */
+a {
+  color: var(--primary-color);
+}
+
+h1, h2, h3 {
+  color: var(--primary-color);
+}
