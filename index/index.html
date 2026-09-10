@@ -3,75 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מיומנה של ג'וניורית</title>
+  <title>מיומנה של ג'וניורית | קהילת סייבר</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --primary: #1e3a8a;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --muted: #64748b;
+      --bg-base: #0c1013;
+      --bg-surface: #141b20;
+      --bg-card: #1b242b;
+      --primary: #639089;
+      --primary-dark: #456260;
+      --accent: #FAD7BA;
+      --slate: #768193;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: rgba(99, 144, 137, 0.25);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: 'Assistant', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
       line-height: 1.6;
-      padding: 20px;
+      background-image: radial-gradient(rgba(99, 144, 137, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      padding-bottom: 60px;
     }
-    .container { max-width: 800px; margin: 0 auto; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+    /* Hero Banner */
     header {
+      margin-top: 40px;
+      padding: 48px 24px;
+      background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(20, 27, 32, 0.6) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       text-align: center;
-      padding: 40px 20px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
-    header img {
-      max-width: 140px;
-      height: auto;
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary-dark), var(--accent), var(--primary));
+    }
+
+    .logo-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .logo-wrapper img {
+      width: 130px;
+      height: 130px;
+      object-fit: cover;
       border-radius: 50%;
-      margin-bottom: 15px;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 20px rgba(250, 215, 186, 0.2);
     }
-    h1 { color: var(--primary); margin-bottom: 10px; font-size: 2rem; }
-    p.lead { color: var(--muted); font-size: 1.1rem; }
-    .post-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: rgba(99, 144, 137, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(250, 215, 186, 0.3);
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
     }
-    .post-card h2 { color: var(--primary); margin-bottom: 12px; }
-    .video-wrapper {
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    p.tagline {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Post Cards */
+    .feed { margin-top: 40px; display: grid; gap: 24px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--slate);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 10px;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .card p {
+      color: var(--text-main);
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+    }
+
+    /* Video Embed Responsive */
+    .video-container {
       position: relative;
       padding-bottom: 56.25%;
       height: 0;
-      margin: 15px 0;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(118, 129, 147, 0.3);
+      margin: 20px 0;
+      background: #000;
     }
-    .video-wrapper iframe {
+
+    .video-container iframe {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
+      border: none;
+    }
+
+    /* WhatsApp community link button */
+    .btn-community {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #ffffff;
+      padding: 10px 20px;
       border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-community:hover {
+      background: var(--primary-dark);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+      color: var(--slate);
+      font-family: 'JetBrains Mono', monospace;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
     <header>
-      <img src="logo.png" alt="לוגו מיומנה של ג'וניורית">
-      <h1>מיומנה של ג'וניורית</h1>
-      <p class="lead">הבלוג לתמיכה וליווי ג'וניוריות בעולמות הסייבר</p>
+      <div class="logo-wrapper">
+        <img src="logo.png" alt="לוגו מיומנה של ג'וניורית">
+      </div>
+      <div>
+        <span class="badge">&gt; cyber_community.init()</span>
+        <h1>מיומנה של ג'וניורית</h1>
+        <p class="tagline">המרחב שלך לעשות צעדים בטוחים בעולם הסייבר – טיפים, ניתוחי מקרים ומדריכים מעשיים.</p>
+      </div>
     </header>
 
-    <main>
-      <article class="post-card">
-        <h2>ברוכות הבאות לקהילה!</h2>
-        <p>כאן יעלו מאמרים, מדריכים וכלים שיעזרו לכן לעשות את הצעדים הראשונים בעולם הסייבר.</p>
+    <main class="feed">
+      <!-- כרטיס פוסט לדוגמה עם וידאו -->
+      <article class="card">
+        <div class="card-meta">
+          <span>מדריך ראשון</span>
+          <span>•</span>
+          <span>עולמות הסייבר</span>
+        </div>
+        <h2>ברוכות הבאות לבלוג! איך להתחיל בתחום?</h2>
+        <p>בסרטון ובמדריך הקצר הזה נדבר על המיומנויות הבסיסיות שכל ג'וניורית צריכה להכיר, איך לבחור נישה (SOC, Research, AppSec) ואיך לבנות נכון את המעבדה הביתית שלך.</p>
+        
+        <!-- דוגמה להטמעת וידאו מיוטיוב - החליפי את הקישור לסרטון שלך -->
+        <div class="video-container">
+          <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="סרטון הדרכה" allowfullscreen></iframe>
+        </div>
+
+        <a href="#" class="btn-community">הצטרפי לקבוצת הוואטסאפ של הקהילה ←</a>
       </article>
     </main>
+
+    <footer>
+      <p>&copy; מיומנה של ג'וניורית // Built for Cyber Juniors</p>
+    </footer>
   </div>
+
 </body>
 </html>
