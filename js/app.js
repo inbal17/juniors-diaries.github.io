@@ -12,14 +12,18 @@ function getQueryParam(param) {
 }
 
 // 1. אתחול עמוד תפקידים (roles.html)
+// 1. אתחול עמוד תפקידים (roles.html)
 function initRolesPage() {
   const container = document.getElementById('rolesGridContainer');
   if (!container) return;
 
-  container.innerHTML = coursesData.tracks.map(track => `
+  // מסננים החוצה את הבסיס ומציגים אך ורק תפקידי התמחות
+  const specializationTracks = coursesData.tracks.filter(track => !track.isBaseTrack);
+
+  container.innerHTML = specializationTracks.map(track => `
     <article class="role-card">
       <div>
-        <div class="role-meta">&gt; ${track.isBaseTrack ? 'entry_level' : 'specialization'}</div>
+        <div class="role-meta">&gt; specialization</div>
         <h3>${track.title}</h3>
         <p>${track.roleDesc}</p>
       </div>
