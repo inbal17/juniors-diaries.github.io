@@ -21,6 +21,7 @@
         <span class="brand-title">מיומנה של ג'וניורית</span>
       </a>
       <div class="nav-actions">
+        <span id="userXPBadge" class="badge" style="margin-bottom:0; font-weight:700;">⚡ 0 XP</span>
         <a href="index.html" class="btn-nav">ראשי</a>
         <a href="roles.html" class="btn-nav">מסלולי תפקידים</a>
         <a href="track.html?id=foundations" class="btn-nav">בסיס הסייבר</a>
@@ -40,7 +41,7 @@
       <a href="roles.html" class="btn-nav">← חזרה לכל התפקידים</a>
     </div>
 
-    <!-- באנר קפיצה לבסיס בכל שלב -->
+    <!-- באנר קפיצה לבסיס -->
     <div class="base-jump-banner" id="baseReminderBanner">
       <div>
         <span>💡 <strong>מרגישה שחסר לך רקע?</strong> את תמיד יכולה לעצור, לרענן את מושגי היסוד ולחזור לכאן בכל רגע.</span>
@@ -79,7 +80,7 @@
 
       <div class="lesson-body">
         
-        <!-- שלבי וידאו: טעימה, עומק, הופכת למומחית -->
+        <!-- שלבי וידאו -->
         <div id="tabContent-videos" class="tab-pane">
           <div class="tier-switcher">
             <button class="tier-btn active" id="tierBtn-taste" onclick="changeVideoTier('taste')">1. טעימה (2 דק')</button>
@@ -145,12 +146,20 @@
         </div>
 
       </div>
+
+      <!-- כפתור סיום שיעור והענקת XP -->
+      <div style="padding: 14px 24px; border-top: 1px solid var(--border-color); text-align: left; background: var(--bg-surface);">
+        <button class="btn-cta" style="padding: 10px 22px; font-size: 0.95rem; margin:0;" onclick="markCurrentLessonAsCompleted()">
+          סיימתי את השיעור בהצלחה! ✓ (+50 XP)
+        </button>
+      </div>
+
     </div>
   </div>
 
   <!-- קבצי נתונים וסקריפטים -->
-  <script src="data/courses.js"></script>
-  <script src="js/app.js"></script>
+  <script src="data/courses.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       initTrackPage();
