@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסלולי תפקידים בסייבר | מיומנה של ג'וניורית</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ניווט עליון -->
+  <nav class="top-bar">
+    <div class="container top-bar-inner">
+      <a href="index.html" class="brand-link">
+        <img src="logo.png" alt="לוגו" class="brand-logo-small" onerror="this.style.display='none'">
+        <span class="brand-title">מיומנה של ג'וניורית</span>
+      </a>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-nav">ראשי</a>
+        <a href="roles.html" class="btn-nav" style="color:var(--accent); border-color:var(--accent);">מסלולי תפקידים</a>
+        <a href="track.html?id=foundations" class="btn-nav">בסיס הסייבר</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    
+    <div class="section-title-wrap">
+      <h2>בחרי את התפקיד שמעניין אותך</h2>
+      <p>לכל תפקיד בסייבר יש מיומנויות, כלים ואופי משלו. בחרי מסלול וצאי לדרך!</p>
+    </div>
+
+    <!-- גריד התפקידים הדינמי -->
+    <div class="roles-grid" id="rolesGridContainer"></div>
+
+    <footer>
+      <p>&copy; מיומנה של ג'וניורית // Built for Cyber Juniors</p>
+    </footer>
+
+  </div>
+
+  <!-- פופאפ שאלת רקע -->
+  <div id="backgroundPromptModal" class="modal-overlay hidden">
+    <div class="prompt-box">
+      <div style="font-size: 2.2rem; margin-bottom: 8px;">🤔</div>
+      <h3>האם יש לך רקע קודם בסייבר?</h3>
+      <p>
+        כדי שתוכלי להפיק את המקסימום ממסלול <strong><span id="selectedRoleName" style="color:var(--accent);"></span></strong>, חשוב לדעת האם כבר יש לך ידע בסיסי ברשתות, תקשורת ומערכות הפעלה.
+      </p>
+
+      <div class="prompt-actions">
+        <button class="btn-choice btn-choice-no" onclick="handleBackgroundChoice(false)">
+          לא, אני רוצה להתחיל מהבסיס 🌱
+        </button>
+        <button class="btn-choice btn-choice-yes" onclick="handleBackgroundChoice(true)">
+          כן, יש לי רקע ואני ממשיכה 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- קבצי נתונים וסקריפטים -->
+  <script src="data/courses.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initRolesPage();
+    });
+  </script>
+</body>
+</html>

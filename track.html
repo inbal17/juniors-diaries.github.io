@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסלול למידה | מיומנה של ג'וניורית</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ניווט עליון -->
+  <nav class="top-bar">
+    <div class="container top-bar-inner">
+      <a href="index.html" class="brand-link">
+        <img src="logo.png" alt="לוגו" class="brand-logo-small" onerror="this.style.display='none'">
+        <span class="brand-title">מיומנה של ג'וניורית</span>
+      </a>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-nav">ראשי</a>
+        <a href="roles.html" class="btn-nav">מסלולי תפקידים</a>
+        <a href="track.html?id=foundations" class="btn-nav">בסיס הסייבר</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    
+    <!-- כותרת המסלול הנבחר -->
+    <div class="track-view-header">
+      <div>
+        <span class="badge" id="currentTrackBadge">&gt; track_roadmap</span>
+        <h2 id="currentTrackHeading">שם המסלול</h2>
+        <p id="currentTrackSub">תיאור המסלול</p>
+      </div>
+      <a href="roles.html" class="btn-nav">← חזרה לכל התפקידים</a>
+    </div>
+
+    <!-- באנר קפיצה לבסיס בכל שלב -->
+    <div class="base-jump-banner" id="baseReminderBanner">
+      <div>
+        <span>💡 <strong>מרגישה שחסר לך רקע?</strong> את תמיד יכולה לעצור, לרענן את מושגי היסוד ולחזור לכאן בכל רגע.</span>
+      </div>
+      <a href="track.html?id=foundations" class="btn-jump-base">ללימוד הבסיס ←</a>
+    </div>
+
+    <!-- עץ השלבים של דואלינגו -->
+    <div class="duo-path" id="duoPathContainer"></div>
+
+    <footer>
+      <p>&copy; מיומנה של ג'וניורית // Built for Cyber Juniors</p>
+    </footer>
+
+  </div>
+
+  <!-- מודאל השיעור האינטראקטיבי -->
+  <div id="lessonModal" class="modal-overlay hidden">
+    <div class="lesson-modal-card">
+      
+      <div class="lesson-modal-header">
+        <div>
+          <span class="cat" id="modalCategory">&gt; networking</span>
+          <h3 id="modalTitle">כותרת השיעור</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeLessonModal()">✕</button>
+      </div>
+
+      <!-- לשוניות -->
+      <div class="lesson-tabs">
+        <button class="lesson-tab-btn active" id="tabBtn-videos" onclick="switchModalTab('videos')">📹 3 שלבי וידאו</button>
+        <button class="lesson-tab-btn" id="tabBtn-cards" onclick="switchModalTab('cards')">🃏 כרטיסיות מושגים</button>
+        <button class="lesson-tab-btn" id="tabBtn-lab" onclick="switchModalTab('lab')">🧪 מעבדה Hands-on</button>
+        <button class="lesson-tab-btn" id="tabBtn-interview" onclick="switchModalTab('interview')">💼 שאלות ראיון ופרויקט</button>
+      </div>
+
+      <div class="lesson-body">
+        
+        <!-- שלבי וידאו: טעימה, עומק, הופכת למומחית -->
+        <div id="tabContent-videos" class="tab-pane">
+          <div class="tier-switcher">
+            <button class="tier-btn active" id="tierBtn-taste" onclick="changeVideoTier('taste')">1. טעימה (2 דק')</button>
+            <button class="tier-btn" id="tierBtn-deep" onclick="changeVideoTier('deep')">2. צלילה לעומק (10 דק')</button>
+            <button class="tier-btn" id="tierBtn-expert" onclick="changeVideoTier('expert')">3. הופכת למומחית (30 דק')</button>
+          </div>
+
+          <div class="video-frame">
+            <video id="videoPlayer" controls>
+              <source id="videoSource" src="" type="video/mp4">
+              הדפדפן שלך אינו תומך בניגון וידאו ישיר.
+            </video>
+          </div>
+          <div class="video-desc" id="videoDescription"></div>
+        </div>
+
+        <!-- כרטיסיות -->
+        <div id="tabContent-cards" class="tab-pane hidden">
+          <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+            לחצי על הכרטיס כדי לגלות את המשמעות הפרקטית
+          </p>
+          <div class="perspective flashcard-box" onclick="flipCard()">
+            <div class="flashcard-inner" id="flashcardInner">
+              <div class="card-face">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 6px;">[מושג סייבר]</span>
+                <h4 id="cardTerm"></h4>
+                <span style="font-size: 0.75rem; color: var(--slate);">(לחצי להפיכה)</span>
+              </div>
+              <div class="card-face rotate-y-180">
+                <p id="cardDefinition"></p>
+              </div>
+            </div>
+          </div>
+          <div class="card-controls">
+            <button class="btn-secondary" onclick="prevCard()">← הקודם</button>
+            <span id="cardCounter" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--slate);">1 / 1</span>
+            <button class="btn-secondary" onclick="nextCard()">הבא →</button>
+          </div>
+        </div>
+
+        <!-- מעבדה -->
+        <div id="tabContent-lab" class="tab-pane hidden">
+          <div class="lab-box">
+            <h4 style="color: var(--accent); margin-bottom: 8px;">🎯 משימת התרגול:</h4>
+            <p id="labInstruction" style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 12px;"></p>
+            <div class="code-snippet" id="labSnippet"></div>
+            <div class="credit-box">
+              <span>מקור ותרגול מומלץ: </span>
+              <a id="labLink" href="#" target="_blank">מעבר לתרגול</a>
+              <span id="labCredit" style="display: block; margin-top: 4px; color: var(--text-muted);"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- שאלות ראיון -->
+        <div id="tabContent-interview" class="tab-pane hidden">
+          <h4 style="color: var(--accent); font-size: 1.05rem; margin-bottom: 12px;">שאלות נפוצות מראיונות עבודה:</h4>
+          <div id="interviewQuestionsList"></div>
+          <div class="project-card">
+            <h4>🛠️ פרויקט מעשי מומלץ ל-GitHub:</h4>
+            <p id="projectIdea" style="font-size: 0.9rem; color: var(--text-main);"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- קבצי נתונים וסקריפטים -->
+  <script src="data/courses.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initTrackPage();
+    });
+  </script>
+</body>
+</html>
