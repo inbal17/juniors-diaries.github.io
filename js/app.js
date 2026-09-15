@@ -1,4 +1,4 @@
-// js/app.js - לוגיקת האתר, ניהול מודאלים ועץ השלבים
+// js/app.js - לוגיקת האתר, ניהול מודאלים, Gamification ועץ השלבים
 
 let currentTrack = null;
 let candidateTrack = null;
@@ -11,7 +11,29 @@ function getQueryParam(param) {
   return urlParams.get(param);
 }
 
-// 1. אתחול עמוד תפקידים (roles.html)
+// === מנגנון Gamification והתקדמות (LocalStorage) ===
+function getCompletedLessons() {
+  return JSON.parse(localStorage.getItem('completedLessons') || '[]');
+}
+
+function getUserXP() {
+  return parseInt(localStorage.getItem('userXP') || '0', 10);
+}
+
+function addXP(amount) {
+  const current = getUserXP();
+  const updated = current + amount;
+  localStorage.setItem('userXP', updated.toString());
+  updateXPDisplay();
+}
+
+function updateXPDisplay() {
+  const xpBadge = document.getElementById('userXPBadge');
+  if (xpBadge) {
+    xpBadge.innerText = `⚡ ${getUserXP()} XP`;
+  }
+}
+
 // 1. אתחול עמוד תפקידים (roles.html)
 function initRolesPage() {
   const container = document.getElementById('rolesGridContainer');
@@ -83,21 +105,25 @@ function initTrackPage() {
   }
 
   renderDuoPath(currentTrack);
+  updateXPDisplay();
 }
 
-// ציור שלבי הדואלינגו
+// ציור שלבי הדואלינגו עם סימון שלב שהושלם
 function renderDuoPath(track) {
   const container = document.getElementById('duoPathContainer');
   if (!container) return;
 
   const positions = ['pos-center', 'pos-right', 'pos-left'];
+  const completed = getCompletedLessons();
 
   container.innerHTML = track.lessons.map((lesson, index) => {
     const posClass = positions[index % positions.length];
+    const isDone = completed.includes(lesson.id);
+
     return `
       <div class="duo-node ${posClass}" onclick="openLessonModal('${lesson.id}')">
-        <div class="duo-circle">
-          ${index + 1}
+        <div class="duo-circle ${isDone ? 'duo-done' : ''}">
+          ${isDone ? '✓' : index + 1}
         </div>
         <div class="duo-title">${lesson.title}</div>
         <div class="duo-sub">&gt; ${lesson.category}</div>
@@ -143,6 +169,22 @@ function closeLessonModal() {
   if (video) video.pause();
   const modal = document.getElementById('lessonModal');
   if (modal) modal.classList.add('hidden');
+}
+
+// כפתור סיום שיעור וקבלת נקודות
+function markCurrentLessonAsCompleted() {
+  if (!activeLesson) return;
+  const completed = getCompletedLessons();
+  if (!completed.includes(activeLesson.id)) {
+    completed.push(activeLesson.id);
+    localStorage.setItem('completedLessons', JSON.stringify(completed));
+    addXP(50);
+    alert("אלופה! סיימת את השיעור וצברת 50 XP! 🛡️⚡");
+  } else {
+    alert("שיעור זה כבר סומן כהושלם!");
+  }
+  closeLessonModal();
+  renderDuoPath(currentTrack);
 }
 
 function switchModalTab(tabId) {
@@ -211,7 +253,7 @@ function prevCard() {
   updateCardView();
 }
 
-// מאזיני סגירת מודאל
+// מאזיני סגירת מודאל בלחיצה על הרקע
 window.addEventListener('DOMContentLoaded', () => {
   const lessonModal = document.getElementById('lessonModal');
   if (lessonModal) {
