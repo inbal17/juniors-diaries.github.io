@@ -147,9 +147,9 @@
 
       </div>
 
-      <!-- כפתור סיום שיעור והענקת XP -->
+      <!-- כפתור סיום שיעור / ביטול סיום והענקת XP -->
       <div style="padding: 14px 24px; border-top: 1px solid var(--border-color); text-align: left; background: var(--bg-surface);">
-        <button class="btn-cta" style="padding: 10px 22px; font-size: 0.95rem; margin:0;" onclick="markCurrentLessonAsCompleted()">
+        <button id="btnToggleCompletion" class="btn-cta" style="padding: 10px 22px; font-size: 0.95rem; margin:0;" onclick="toggleLessonCompletion()">
           סיימתי את השיעור בהצלחה! ✓ (+50 XP)
         </button>
       </div>
@@ -158,8 +158,8 @@
   </div>
 
   <!-- קבצי נתונים וסקריפטים -->
-  <script src="data/courses.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="data/courses.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       initTrackPage();
