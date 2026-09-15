@@ -1,28 +1,156 @@
-// js/app.js - לוגיקת האתר, ניהול מודאלים, Gamification ועץ השלבים
+// js/app.js - לוגיקת האתר עם רשת ביטחון מובנית (Fail-Safe)
 
 let currentTrack = null;
 let candidateTrack = null;
 let activeLesson = null;
 let activeCardIndex = 0;
 
-// פונקציית עזר להוצאת פרמטרים מכתובת ה-URL
+// === רשת ביטחון (עותק גיבוי מובנה למקרה ש-courses.js נפגם) ===
+const fallbackCoursesData = {
+  tracks: [
+    {
+      id: "foundations",
+      title: "בסיס חובה לכל תפקיד",
+      isBaseTrack: true,
+      roleDesc: "שער הכניסה לעולם הסייבר! תקשורת מחשבים, מערכות הפעלה ועקרונות אבטחה בסיסיים.",
+      lessons: [
+        {
+          id: "net-osi",
+          title: "מודל OSI ופרוטוקולי תקשורת",
+          category: "networking",
+          videos: {
+            taste: { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", desc: "טעימה (2 דקות): מודל 7 השכבות ו-TCP מול UDP." },
+            deep: { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", desc: "צלילה לעומק (10 דקות): לחיצת יד משולשת וניתוח כותרות IP." },
+            expert: { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", desc: "הופכת למומחית (30 דקות): ניתוח תעבורה ואיתור אנומליות." }
+          },
+          cards: [{ term: "TCP Handshake", def: "לחיצת יד משולשת (SYN, SYN-ACK, ACK) להקמת חיבור אמין." }],
+          lab: { instruction: "ניתוח קובץ PCAP ב-Wireshark לאיתור דומיין חשוד.", snippet: "wireshark capture.pcap", link: "https://www.wireshark.org", credit: "Wireshark Sample" },
+          interviewQuestions: [{ q: "מה ההבדל בין TCP ל-UDP?", a: "TCP אמין ומבטיח הגעה, UDP מהיר ללא בדיקת הגעה." }],
+          projectIdea: "כתיבת סקריפט Python ב-Scapy להאזנה לתעבורת DNS."
+        }
+      ]
+    },
+    {
+      id: "security-research",
+      title: "חוקרת אבטחה (Security Research)",
+      roleDesc: "הנדסה לאחור (Reverse Engineering), ניתוח נוזקות, מציאת חולשות Zero-Day ופיתוח Exploits.",
+      lessons: [
+        {
+          id: "reverse-eng",
+          title: "מבוא להנדסה לאחור ו-Assembly",
+          category: "reverse_engineering",
+          videos: {
+            taste: { url: "", desc: "2 דקות: איך קוד הופך לבינארי ומה עושה Decompiler." },
+            deep: { url: "", desc: "10 דקות: אוגרים, ה-Stack ופקודות בסיס ב-x86." },
+            expert: { url: "", desc: "30 דקות: פתיחת קובץ CrackMe ב-Ghidra ועקיפת בדיקה." }
+          },
+          cards: [{ term: "Decompiler", def: "כלי המתרגם שפת מכונה חזרה לקוד דמוי C." }],
+          lab: { instruction: "פתחי קובץ בינארי ב-Ghidra ואתרי את תנאי הסיסמה.", snippet: "ghidraRun", link: "https://ghidra-sre.org", credit: "Ghidra Lab" },
+          interviewQuestions: [{ q: "מה ההבדל בין ניתוח סטטי לדינמי?", a: "סטטי בודק קוד בלי להריץ, דינמי מריץ בסביבה מבודדת." }],
+          projectIdea: "ניתוח דוגמת נוזקה בלתי מזיקה וכתיבת דוח IOC."
+        }
+      ]
+    },
+    {
+      id: "soc-analyst",
+      title: "אנליסטית SOC (Blue Team)",
+      roleDesc: "תחקור התראות מרובות ממערכות SIEM, ניתוח לוגים, זיהוי מתקפות ובלימה ראשונית.",
+      lessons: [
+        {
+          id: "soc-logs",
+          title: "ניתוח לוגים ו-Windows Event IDs",
+          category: "blue_team",
+          videos: {
+            taste: { url: "", desc: "2 דקות: מה רואה אנליסטית SOC מול המסך." },
+            deep: { url: "", desc: "10 דקות: אירועים קריטיים: 4624 מול 4625." },
+            expert: { url: "", desc: "30 דקות: שרשרת תקיפה מלאה בלוגים." }
+          },
+          cards: [{ term: "Event ID 4625", def: "ניסיון התחברות שנכשל ב-Windows." }],
+          lab: { instruction: "נתחי קובץ Evtx ומצאי את ה-IP שתקף ב-Brute Force.", snippet: "Get-WinEvent -Path ./Sec.evtx", link: "https://tryhackme.com", credit: "TryHackMe" },
+          interviewQuestions: [{ q: "כיצד תבדילי בין שכחת סיסמה למתקפת Brute Force?", a: "לפי תדירות ניסיונות בשנייה ומקור ה-IP." }],
+          projectIdea: "הקמת סביבת Wazuh מקומית ותחקור אירוע."
+        }
+      ]
+    },
+    {
+      id: "appsec",
+      title: "בודקת חדירות ו-AppSec (Red Team)",
+      roleDesc: "בדיקת עמידות אפליקציות ואתרים, דימוי תקיפות (OWASP Top 10) וכתיבת דוחות תיקון.",
+      lessons: [
+        {
+          id: "sqli-lesson",
+          title: "חולשות הזרקת קוד (SQL Injection)",
+          category: "appsec_redteam",
+          videos: {
+            taste: { url: "", desc: "2 דקות: עקיפת אימות בעזרת שאילתה פשוטה." },
+            deep: { url: "", desc: "10 דקות: In-band מול Blind SQLi." },
+            expert: { url: "", desc: "30 דקות: עקיפת WAF וכתיבת Remediation." }
+          },
+          cards: [{ term: "Prepared Statements", def: "הפרדת הקוד משאילתת המשתמש למניעת SQLi." }],
+          lab: { instruction: "עקיפת אימות ב-PortSwigger Academy.", snippet: "admin' --", link: "https://portswigger.net", credit: "PortSwigger" },
+          interviewQuestions: [{ q: "איך מונעים SQLi בקוד?", a: "שימוש ב-Parameterized Queries ו-ORM." }],
+          projectIdea: "פיתוח אפליקציה פגיעה ותיקון הקוד ב-GitHub."
+        }
+      ]
+    },
+    {
+      id: "grc",
+      title: "מנהלת רגולציה וסיכונים (GRC)",
+      roleDesc: "החיבור בין הסייבר הטכני לניהול, עבודה מול תקנים (ISO 27001), וקביעת מדיניות אבטחה.",
+      lessons: [
+        {
+          id: "grc-risk",
+          title: "מתודולוגיית ניהול והערכת סיכונים",
+          category: "grc_compliance",
+          videos: {
+            taste: { url: "", desc: "2 דקות: איום, חולשה וסיכון." },
+            deep: { url: "", desc: "10 דקות: בניית מטריצת סיכונים." },
+            expert: { url: "", desc: "30 דקות: הכנה מלאה להסמכת ISO 27001." }
+          },
+          cards: [{ term: "Risk Formula", def: "Risk = Threat × Vulnerability × Impact" }],
+          lab: { instruction: "בניית מסמך הערכת סיכונים לסטארט-אפ.", snippet: "Asset: DB | Threat: Ransomware", link: "https://csrc.nist.gov", credit: "NIST" },
+          interviewQuestions: [{ q: "מהן 4 הדרכים לטיפול בסיכון?", a: "הפחתה, העברה, קבלה, או הימנעות." }],
+          projectIdea: "כתיבת מדיניות אבטחת מידע ארגונית."
+        }
+      ]
+    }
+  ]
+};
+
+// פונקציה שמבטיחה שהנתונים קיימים תמיד
+function getSafeCoursesData() {
+  if (typeof coursesData !== 'undefined' && coursesData && Array.isArray(coursesData.tracks) && coursesData.tracks.length > 0) {
+    return coursesData;
+  }
+  console.warn("Using fallback courses data to prevent blank screen.");
+  return fallbackCoursesData;
+}
+
 function getQueryParam(param) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(param);
 }
 
-// === מנגנון Gamification והתקדמות (LocalStorage) ===
+// === Gamification ===
 function getCompletedLessons() {
-  return JSON.parse(localStorage.getItem('completedLessons') || '[]');
+  try {
+    return JSON.parse(localStorage.getItem('completedLessons') || '[]');
+  } catch (e) {
+    return [];
+  }
 }
 
 function getUserXP() {
-  return parseInt(localStorage.getItem('userXP') || '0', 10);
+  try {
+    return parseInt(localStorage.getItem('userXP') || '0', 10);
+  } catch (e) {
+    return 0;
+  }
 }
 
 function addXP(amount) {
   const current = getUserXP();
-  const updated = Math.max(0, current + amount); // מונע מ-XP לרדת מתחת ל-0
+  const updated = Math.max(0, current + amount);
   localStorage.setItem('userXP', updated.toString());
   updateXPDisplay();
 }
@@ -34,31 +162,35 @@ function updateXPDisplay() {
   }
 }
 
-// 1. אתחול עמוד תפקידים (roles.html)
+// 1. אתחול עמוד תפקידים (roles.html) מוגן משגיאות
 function initRolesPage() {
-  const container = document.getElementById('rolesGridContainer');
-  if (!container) return;
+  try {
+    const container = document.getElementById('rolesGridContainer');
+    if (!container) return;
 
-  // מסננים החוצה את הבסיס ומציגים אך ורק תפקידי התמחות
-  const specializationTracks = coursesData.tracks.filter(track => !track.isBaseTrack);
+    const data = getSafeCoursesData();
+    const specializationTracks = data.tracks.filter(track => !track.isBaseTrack);
 
-  container.innerHTML = specializationTracks.map(track => `
-    <article class="role-card">
-      <div>
-        <div class="role-meta">&gt; specialization</div>
-        <h3>${track.title}</h3>
-        <p>${track.roleDesc}</p>
-      </div>
-      <button class="btn-start-role" onclick="handleRoleSelection('${track.id}')">
-        אני רוצה להתחיל ללמוד ←
-      </button>
-    </article>
-  `).join('');
+    container.innerHTML = specializationTracks.map(track => `
+      <article class="role-card">
+        <div>
+          <div class="role-meta">&gt; specialization</div>
+          <h3>${track.title || 'תפקיד'}</h3>
+          <p>${track.roleDesc || ''}</p>
+        </div>
+        <button class="btn-start-role" onclick="handleRoleSelection('${track.id}')">
+          אני רוצה להתחיל ללמוד ←
+        </button>
+      </article>
+    `).join('');
+  } catch (err) {
+    console.error("Error in initRolesPage:", err);
+  }
 }
 
-// בלחיצה על תפקיד - בדיקה האם זה בסיס או דורש שאלת רקע
 function handleRoleSelection(trackId) {
-  const track = coursesData.tracks.find(t => t.id === trackId);
+  const data = getSafeCoursesData();
+  const track = data.tracks.find(t => t.id === trackId);
   if (!track) return;
 
   if (track.isBaseTrack) {
@@ -74,7 +206,6 @@ function handleRoleSelection(trackId) {
   if (modal) modal.classList.remove('hidden');
 }
 
-// בחירה מתוך פופאפ הרקע
 function handleBackgroundChoice(hasBackground) {
   const modal = document.getElementById('backgroundPromptModal');
   if (modal) modal.classList.add('hidden');
@@ -86,60 +217,73 @@ function handleBackgroundChoice(hasBackground) {
   }
 }
 
-// 2. אתחול עמוד מסלול למידה (track.html)
+// 2. אתחול עמוד מסלול למידה (track.html) מוגן משגיאות
 function initTrackPage() {
-  const trackId = getQueryParam('id') || 'foundations';
-  currentTrack = coursesData.tracks.find(t => t.id === trackId) || coursesData.tracks[0];
+  try {
+    const data = getSafeCoursesData();
+    const trackId = getQueryParam('id') || 'foundations';
+    currentTrack = data.tracks.find(t => t.id === trackId) || data.tracks[0];
 
-  const titleEl = document.getElementById('currentTrackHeading');
-  const subEl = document.getElementById('currentTrackSub');
-  const badgeEl = document.getElementById('currentTrackBadge');
-  const bannerEl = document.getElementById('baseReminderBanner');
+    const titleEl = document.getElementById('currentTrackHeading');
+    const subEl = document.getElementById('currentTrackSub');
+    const badgeEl = document.getElementById('currentTrackBadge');
+    const bannerEl = document.getElementById('baseReminderBanner');
 
-  if (titleEl) titleEl.innerText = currentTrack.title;
-  if (subEl) subEl.innerText = currentTrack.roleDesc;
-  if (badgeEl) badgeEl.innerText = `> ${currentTrack.id}_track`;
+    if (titleEl) titleEl.innerText = currentTrack.title || '';
+    if (subEl) subEl.innerText = currentTrack.roleDesc || '';
+    if (badgeEl) badgeEl.innerText = `> ${currentTrack.id}_track`;
 
-  if (bannerEl) {
-    bannerEl.style.display = currentTrack.isBaseTrack ? 'none' : 'flex';
+    if (bannerEl) {
+      bannerEl.style.display = currentTrack.isBaseTrack ? 'none' : 'flex';
+    }
+
+    renderDuoPath(currentTrack);
+    updateXPDisplay();
+  } catch (err) {
+    console.error("Error in initTrackPage:", err);
   }
-
-  renderDuoPath(currentTrack);
-  updateXPDisplay();
 }
 
-// ציור שלבי הדואלינגו עם סימון שלב שהושלם
 function renderDuoPath(track) {
-  const container = document.getElementById('duoPathContainer');
-  if (!container) return;
+  try {
+    const container = document.getElementById('duoPathContainer');
+    if (!container) return;
 
-  const positions = ['pos-center', 'pos-right', 'pos-left'];
-  const completed = getCompletedLessons();
+    const positions = ['pos-center', 'pos-right', 'pos-left'];
+    const completed = getCompletedLessons();
+    const validLessons = (track.lessons || []).filter(l => l && l.id && l.title);
 
-  container.innerHTML = track.lessons.map((lesson, index) => {
-    const posClass = positions[index % positions.length];
-    const isDone = completed.includes(lesson.id);
+    if (validLessons.length === 0) {
+      container.innerHTML = `<p style="color:var(--text-muted); padding:30px;">עדיין לא נוספו שיעורים למסלול זה.</p>`;
+      return;
+    }
 
-    return `
-      <div class="duo-node ${posClass}" onclick="openLessonModal('${lesson.id}')">
-        <div class="duo-circle ${isDone ? 'duo-done' : ''}">
-          ${isDone ? '✓' : index + 1}
+    container.innerHTML = validLessons.map((lesson, index) => {
+      const posClass = positions[index % positions.length];
+      const isDone = completed.includes(lesson.id);
+
+      return `
+        <div class="duo-node ${posClass}" onclick="openLessonModal('${lesson.id}')">
+          <div class="duo-circle ${isDone ? 'duo-done' : ''}">
+            ${isDone ? '✓' : index + 1}
+          </div>
+          <div class="duo-title">${lesson.title}</div>
+          <div class="duo-sub">&gt; ${lesson.category || 'lesson'}</div>
         </div>
-        <div class="duo-title">${lesson.title}</div>
-        <div class="duo-sub">&gt; ${lesson.category}</div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  } catch (err) {
+    console.error("Error in renderDuoPath:", err);
+  }
 }
 
-// פתיחת מודאל שיעור
 function openLessonModal(lessonId) {
-  if (!currentTrack) return;
+  if (!currentTrack || !currentTrack.lessons) return;
   activeLesson = currentTrack.lessons.find(l => l.id === lessonId);
   if (!activeLesson) return;
 
-  document.getElementById('modalCategory').innerText = `> ${activeLesson.category}`;
-  document.getElementById('modalTitle').innerText = activeLesson.title;
+  document.getElementById('modalCategory').innerText = `> ${activeLesson.category || 'general'}`;
+  document.getElementById('modalTitle').innerText = activeLesson.title || 'שיעור';
 
   switchModalTab('videos');
   changeVideoTier('taste');
@@ -147,24 +291,24 @@ function openLessonModal(lessonId) {
   activeCardIndex = 0;
   updateCardView();
 
-  document.getElementById('labInstruction').innerText = activeLesson.lab.instruction;
-  document.getElementById('labSnippet').innerText = activeLesson.lab.snippet;
-  document.getElementById('labLink').href = activeLesson.lab.link;
-  document.getElementById('labCredit').innerText = activeLesson.lab.credit;
+  const lab = activeLesson.lab || {};
+  document.getElementById('labInstruction').innerText = lab.instruction || 'אין הוראות כרגע.';
+  document.getElementById('labSnippet').innerText = lab.snippet || '';
+  document.getElementById('labLink').href = lab.link || '#';
+  document.getElementById('labCredit').innerText = lab.credit || '';
 
   const qList = document.getElementById('interviewQuestionsList');
-  qList.innerHTML = activeLesson.interviewQuestions.map(item => `
+  const questions = activeLesson.interviewQuestions || [];
+  qList.innerHTML = questions.map(item => `
     <div class="interview-item">
-      <div class="interview-q">שאלה: ${item.q}</div>
-      <div class="interview-a">תשובה מומלצת: ${item.a}</div>
+      <div class="interview-q">שאלה: ${item.q || ''}</div>
+      <div class="interview-a">תשובה מומלצת: ${item.a || ''}</div>
     </div>
   `).join('');
 
-  document.getElementById('projectIdea').innerText = activeLesson.projectIdea;
+  document.getElementById('projectIdea').innerText = activeLesson.projectIdea || 'בניית פרויקט אישי ל-GitHub בנושא זה.';
 
-  // עדכון מצב הכפתור (סיום / ביטול סיום)
   updateCompletionButton();
-
   document.getElementById('lessonModal').classList.remove('hidden');
 }
 
@@ -175,7 +319,6 @@ function closeLessonModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-// עדכון טקסט ונראות כפתור ההשלמה במודאל
 function updateCompletionButton() {
   const btn = document.getElementById('btnToggleCompletion');
   if (!btn || !activeLesson) return;
@@ -196,7 +339,6 @@ function updateCompletionButton() {
   }
 }
 
-// כפתור חכם: מסמן כהושלם או מסיר את הסימון (כולל עדכון XP)
 function toggleLessonCompletion() {
   if (!activeLesson) return;
 
@@ -245,7 +387,8 @@ function changeVideoTier(tier) {
     }
   });
 
-  const videoData = activeLesson.videos[tier];
+  const videos = activeLesson.videos || {};
+  const videoData = videos[tier] || {};
   const player = document.getElementById('videoPlayer');
   const source = document.getElementById('videoSource');
 
@@ -254,7 +397,7 @@ function changeVideoTier(tier) {
     player.load();
   }
   const desc = document.getElementById('videoDescription');
-  if (desc) desc.innerText = videoData.desc;
+  if (desc) desc.innerText = videoData.desc || 'סרטון הדרכה לשיעור זה.';
 }
 
 function flipCard() {
@@ -265,27 +408,35 @@ function flipCard() {
 function updateCardView() {
   const inner = document.getElementById('flashcardInner');
   if (inner) inner.classList.remove('rotate-y-180');
-  if (!activeLesson || !activeLesson.cards.length) return;
+  
+  const cards = (activeLesson && activeLesson.cards) || [];
+  if (cards.length === 0) {
+    document.getElementById('cardTerm').innerText = "אין כרטיסיות";
+    document.getElementById('cardDefinition').innerText = "לא נוספו כרטיסיות לשיעור זה.";
+    document.getElementById('cardCounter').innerText = "0 / 0";
+    return;
+  }
 
-  const card = activeLesson.cards[activeCardIndex];
-  document.getElementById('cardTerm').innerText = card.term;
-  document.getElementById('cardDefinition').innerText = card.def;
-  document.getElementById('cardCounter').innerText = `${activeCardIndex + 1} / ${activeLesson.cards.length}`;
+  const card = cards[activeCardIndex] || cards[0];
+  document.getElementById('cardTerm').innerText = card.term || '';
+  document.getElementById('cardDefinition').innerText = card.def || '';
+  document.getElementById('cardCounter').innerText = `${activeCardIndex + 1} / ${cards.length}`;
 }
 
 function nextCard() {
-  if (!activeLesson) return;
-  activeCardIndex = (activeCardIndex + 1) % activeLesson.cards.length;
+  const cards = (activeLesson && activeLesson.cards) || [];
+  if (cards.length === 0) return;
+  activeCardIndex = (activeCardIndex + 1) % cards.length;
   updateCardView();
 }
 
 function prevCard() {
-  if (!activeLesson) return;
-  activeCardIndex = (activeCardIndex - 1 + activeLesson.cards.length) % activeLesson.cards.length;
+  const cards = (activeLesson && activeLesson.cards) || [];
+  if (cards.length === 0) return;
+  activeCardIndex = (activeCardIndex - 1 + cards.length) % cards.length;
   updateCardView();
 }
 
-// מאזיני סגירת מודאל בלחיצה על הרקע
 window.addEventListener('DOMContentLoaded', () => {
   const lessonModal = document.getElementById('lessonModal');
   if (lessonModal) {
