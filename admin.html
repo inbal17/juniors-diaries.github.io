@@ -66,16 +66,16 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 28px;
+      padding: 24px;
       margin-bottom: 24px;
     }
 
     .admin-card h3 {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       color: var(--accent);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
 
     .grid-2 {
@@ -106,15 +106,30 @@
       background: #15803d;
       border-color: #86efac;
     }
+    .btn-download:hover { background: #166534; }
 
-    .btn-download:hover {
-      background: #166534;
+    .btn-danger {
+      background: #991b1b;
+      border-color: #f87171;
     }
+    .btn-danger:hover { background: #7f1d1d; }
+
+    .mode-indicator {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 12px;
+    }
+    .mode-new { background: rgba(99, 144, 137, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+    .mode-edit { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #fde047; }
   </style>
 </head>
 <body>
 
-  <!-- מסך כניסה מאובטח בסיסמה -->
+  <!-- מסך כניסה מאובטח -->
   <div id="loginScreen" class="container">
     <div class="admin-login-box">
       <div style="font-size: 2.5rem; margin-bottom: 10px;">🔐</div>
@@ -129,35 +144,45 @@
     </div>
   </div>
 
-  <!-- לוח הבקרה של המנהלת -->
+  <!-- לוח הבקרה -->
   <div id="adminPanel" class="container admin-panel">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <div>
         <span class="badge">&gt; admin_dashboard.active</span>
-        <h1 style="font-size: 2rem; margin: 0;">הוספת תוכן ושיעורים חדשים</h1>
+        <h1 style="font-size: 2rem; margin: 0;">ניהול, עדכון והוספת שיעורים</h1>
       </div>
       <button class="btn-nav" onclick="logoutAdmin()">התנתקות ✕</button>
     </div>
 
-    <!-- טופס הוספת שיעור -->
-    <div class="admin-card">
-      <h3>1. פרטי השיעור והמסלול</h3>
-      
+    <!-- בחירת מצב: עריכת שיעור קיים או יצירת חדש -->
+    <div class="admin-card" style="border-color: var(--accent);">
+      <h3>בחר פעולה: עריכת שיעור קיים או יצירת חדש</h3>
       <div class="grid-2">
         <div class="form-group">
-          <label>לאיזה מסלול להוסיף את השיעור?</label>
-          <select id="lessonTrackSelect" class="form-control"></select>
+          <label>1. בחרי מסלול:</label>
+          <select id="lessonTrackSelect" class="form-control" onchange="onTrackChanged()"></select>
         </div>
         <div class="form-group">
-          <label>קטגוריה טכנית (למשל networking, memory, blue_team):</label>
-          <input type="text" id="lessonCategory" class="form-control" placeholder="למשל: linux_privesc">
+          <label>2. בחרי שיעור לעריכה (או הוספת שיעור חדש):</label>
+          <select id="existingLessonSelect" class="form-control" onchange="onLessonSelected()"></select>
         </div>
       </div>
+      <div id="editModeIndicator" class="mode-indicator mode-new">מצב נוכחי: יצירת שיעור חדש ✨</div>
+    </div>
 
-      <div class="form-group">
-        <label>כותרת השיעור:</label>
-        <input type="text" id="lessonTitle" class="form-control" placeholder="למשל: סריקת פורטים והגנה מפני Nmap">
+    <!-- טופס תוכן השיעור -->
+    <div class="admin-card">
+      <h3>1. פרטי השיעור</h3>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>כותרת השיעור (שדה חובה):</label>
+          <input type="text" id="lessonTitle" class="form-control" placeholder="למשל: סריקת פורטים ב-Nmap">
+        </div>
+        <div class="form-group">
+          <label>קטגוריה טכנית באנגלית (למשל: networking, reverse_engineering):</label>
+          <input type="text" id="lessonCategory" class="form-control" placeholder="למשל: blue_team">
+        </div>
       </div>
     </div>
 
@@ -165,89 +190,86 @@
       <h3>2. שלבי הווידאו (3 רמות)</h3>
       
       <div class="form-group">
-        <label>טעימה (2 דק') - קישור MP4 ישיר (או GitHub Release):</label>
+        <label>1. טעימה (2 דק') - קישור MP4 ישיר:</label>
         <input type="text" id="videoTasteUrl" class="form-control" placeholder="https://...">
         <label style="margin-top: 6px;">תיאור קצר לסרטון הטעימה:</label>
-        <input type="text" id="videoTasteDesc" class="form-control" placeholder="ב-2 דקות: מה זה Nmap ומתי משתמשים בו?">
+        <input type="text" id="videoTasteDesc" class="form-control" placeholder="ב-2 דקות: מה הרעיון המרכזי?">
       </div>
 
       <div class="form-group">
-        <label>צלילה לעומק (10 דק') - קישור MP4 ישיר:</label>
+        <label>2. צלילה לעומק (10 דק') - קישור MP4 ישיר:</label>
         <input type="text" id="videoDeepUrl" class="form-control" placeholder="https://...">
         <label style="margin-top: 6px;">תיאור קצר לסרטון העומק:</label>
-        <input type="text" id="videoDeepDesc" class="form-control" placeholder="10 דקות: איך עובד SYN Scan וניתוח חבילות.">
+        <input type="text" id="videoDeepDesc" class="form-control" placeholder="10 דקות: הבנה טכנית של המנגנון.">
       </div>
 
       <div class="form-group">
-        <label>הופכת למומחית (30 דק') - קישור MP4 ישיר:</label>
+        <label>3. הופכת למומחית (30 דק') - קישור MP4 ישיר:</label>
         <input type="text" id="videoExpertUrl" class="form-control" placeholder="https://...">
         <label style="margin-top: 6px;">תיאור קצר לסרטון המומחית:</label>
-        <input type="text" id="videoExpertDesc" class="form-control" placeholder="30 דקות מאסטר-קלאס: תרחיש מעשי מהשטח.">
+        <input type="text" id="videoExpertDesc" class="form-control" placeholder="30 דקות מאסטר-קלאס מעמיק.">
       </div>
     </div>
 
     <div class="admin-card">
-      <h3>3. כרטיסיית מושג ומעבדה (Hands-on)</h3>
-      
+      <h3>3. כרטיסיית מושגים ומעבדה Hands-on</h3>
       <div class="grid-2">
         <div class="form-group">
-          <label>מושג סייבר (מונח מקצועי):</label>
+          <label>מושג סייבר מקצועי:</label>
           <input type="text" id="cardTermInput" class="form-control" placeholder="למשל: SYN Flood">
         </div>
         <div class="form-group">
-          <label>הסבר המושג / המשמעות הפרקטית:</label>
+          <label>הסבר המושג / משמעות פרקטית:</label>
           <textarea id="cardDefInput" class="form-control" placeholder="הסבר קצר על המושג..."></textarea>
         </div>
       </div>
 
       <div class="form-group">
-        <label>הוראות מעבדה:</label>
-        <textarea id="labInstructionInput" class="form-control" placeholder="מה המשימה המעשית שהלומדת צריכה לבצע?"></textarea>
+        <label>הוראות מעבדה מעשית:</label>
+        <textarea id="labInstructionInput" class="form-control" placeholder="מה המשימה שהלומדת צריכה לבצע?"></textarea>
       </div>
 
       <div class="grid-2">
         <div class="form-group">
           <label>פקודת קוד / סניפט למעבדה:</label>
-          <input type="text" id="labSnippetInput" class="form-control" placeholder="nmap -sS -p- 192.168.1.1">
+          <input type="text" id="labSnippetInput" class="form-control" placeholder="wireshark capture.pcap">
         </div>
         <div class="form-group">
-          <label>קישור למעבדה חיצונית (TryHackMe / PortSwigger וכו'):</label>
+          <label>קישור למעבדה (TryHackMe / PortSwigger וכו'):</label>
           <input type="text" id="labLinkInput" class="form-control" placeholder="https://...">
         </div>
       </div>
     </div>
 
     <div class="admin-card">
-      <h3>4. שאלת ראיון ורעיון לפרויקט</h3>
-      
+      <h3>4. שאלות ראיון עבודה ופרויקט ל-GitHub</h3>
       <div class="form-group">
-        <label>שאלה נפוצה מראיונות עבודה:</label>
-        <input type="text" id="interviewQInput" class="form-control" placeholder="מה ההבדל בין סריקת TCP Connect ל-SYN Scan?">
+        <label>שאלה נפוצה מראיון עבודה:</label>
+        <input type="text" id="interviewQInput" class="form-control" placeholder="שאלה טכנית שנשאלת בראיונות...">
       </div>
-
       <div class="form-group">
         <label>תשובה מומלצת:</label>
-        <textarea id="interviewAInput" class="form-control" placeholder="תשובה מדויקת ומקצועית..."></textarea>
+        <textarea id="interviewAInput" class="form-control" placeholder="תשובה מקצועית..."></textarea>
       </div>
-
       <div class="form-group">
-        <label>הצעה לפרויקט עבור הפורטפוליו ב-GitHub:</label>
-        <textarea id="projectIdeaInput" class="form-control" placeholder="בניית Port Scanner פשוט בפייתון..."></textarea>
+        <label>הצעה לפרויקט לפורטפוליו ב-GitHub:</label>
+        <textarea id="projectIdeaInput" class="form-control" placeholder="פרויקט מומלץ להעלות לגיטהאב..."></textarea>
       </div>
     </div>
 
-    <!-- כפתורי שמירה וייצוא -->
-    <div style="display: flex; gap: 14px; justify-content: center; margin-top: 30px;">
-      <button class="btn-admin" onclick="addNewLessonToData()">➕ הוסיפי את השיעור למאגר</button>
-      <button class="btn-admin btn-download" onclick="downloadCoursesFile()">💾 הורידי קובץ courses.js מעודכן</button>
+    <!-- כפתורי פעולה -->
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 24px;">
+      <button class="btn-admin" id="btnSaveLesson" onclick="saveLesson()">💾 שמרי עדכון / שיעור למאגר</button>
+      <button class="btn-admin btn-danger" id="btnDeleteLesson" onclick="deleteLesson()" style="display: none;">🗑️ מחקי שיעור זה</button>
+      <button class="btn-admin btn-download" onclick="downloadCoursesFile()">📥 הורידי קובץ courses.js מעודכן</button>
     </div>
 
   </div>
 
-  <script src="data/courses.js?v=4"></script>
+  <script src="data/courses.js"></script>
   <script>
-    // סיסמת ברירת מחדל
     const ADMIN_PASS = "cyberjunior2026";
+    let editingLessonId = null;
 
     function checkAdminPassword() {
       const input = document.getElementById('adminPasswordInput').value;
@@ -267,61 +289,176 @@
     }
 
     function loadTracksDropdown() {
-      const select = document.getElementById('lessonTrackSelect');
-      select.innerHTML = coursesData.tracks.map(t => `
+      const trackSelect = document.getElementById('lessonTrackSelect');
+      trackSelect.innerHTML = coursesData.tracks.map(t => `
         <option value="${t.id}">${t.title}</option>
       `).join('');
+      onTrackChanged();
     }
 
-    function addNewLessonToData() {
+    function onTrackChanged() {
+      const trackId = document.getElementById('lessonTrackSelect').value;
+      const track = coursesData.tracks.find(t => t.id === trackId);
+      const lessonSelect = document.getElementById('existingLessonSelect');
+
+      if (!track) return;
+
+      let options = `<option value="NEW">➕ יצירת שיעור חדש למסלול זה</option>`;
+      options += track.lessons.map(l => `<option value="${l.id}">עריכה: ${l.title}</option>`).join('');
+      lessonSelect.innerHTML = options;
+
+      onLessonSelected();
+    }
+
+    function onLessonSelected() {
+      const trackId = document.getElementById('lessonTrackSelect').value;
+      const lessonId = document.getElementById('existingLessonSelect').value;
+      const track = coursesData.tracks.find(t => t.id === trackId);
+      const indicator = document.getElementById('editModeIndicator');
+      const deleteBtn = document.getElementById('btnDeleteLesson');
+
+      if (lessonId === "NEW") {
+        editingLessonId = null;
+        indicator.className = "mode-indicator mode-new";
+        indicator.innerText = "מצב נוכחי: יצירת שיעור חדש ✨";
+        deleteBtn.style.display = "none";
+        clearForm();
+      } else {
+        const lesson = track.lessons.find(l => l.id === lessonId);
+        if (lesson) {
+          editingLessonId = lesson.id;
+          indicator.className = "mode-indicator mode-edit";
+          indicator.innerText = `מצב נוכחי: עריכת "${lesson.title}" ✏️`;
+          deleteBtn.style.display = "inline-block";
+          populateForm(lesson);
+        }
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('lessonTitle').value = "";
+      document.getElementById('lessonCategory').value = "";
+      document.getElementById('videoTasteUrl').value = "";
+      document.getElementById('videoTasteDesc').value = "";
+      document.getElementById('videoDeepUrl').value = "";
+      document.getElementById('videoDeepDesc').value = "";
+      document.getElementById('videoExpertUrl').value = "";
+      document.getElementById('videoExpertDesc').value = "";
+      document.getElementById('cardTermInput').value = "";
+      document.getElementById('cardDefInput').value = "";
+      document.getElementById('labInstructionInput').value = "";
+      document.getElementById('labSnippetInput').value = "";
+      document.getElementById('labLinkInput').value = "";
+      document.getElementById('interviewQInput').value = "";
+      document.getElementById('interviewAInput').value = "";
+      document.getElementById('projectIdeaInput').value = "";
+    }
+
+    function populateForm(l) {
+      document.getElementById('lessonTitle').value = l.title || "";
+      document.getElementById('lessonCategory').value = l.category || "";
+
+      document.getElementById('videoTasteUrl').value = l.videos?.taste?.url || "";
+      document.getElementById('videoTasteDesc').value = l.videos?.taste?.desc || "";
+      document.getElementById('videoDeepUrl').value = l.videos?.deep?.url || "";
+      document.getElementById('videoDeepDesc').value = l.videos?.deep?.desc || "";
+      document.getElementById('videoExpertUrl').value = l.videos?.expert?.url || "";
+      document.getElementById('videoExpertDesc').value = l.videos?.expert?.desc || "";
+
+      const card = l.cards?.[0] || {};
+      document.getElementById('cardTermInput').value = card.term || "";
+      document.getElementById('cardDefInput').value = card.def || "";
+
+      document.getElementById('labInstructionInput').value = l.lab?.instruction || "";
+      document.getElementById('labSnippetInput').value = l.lab?.snippet || "";
+      document.getElementById('labLinkInput').value = l.lab?.link || "";
+
+      const interview = l.interviewQuestions?.[0] || {};
+      document.getElementById('interviewQInput').value = interview.q || "";
+      document.getElementById('interviewAInput').value = interview.a || "";
+
+      document.getElementById('projectIdeaInput').value = l.projectIdea || "";
+    }
+
+    function saveLesson() {
+      const title = document.getElementById('lessonTitle').value.trim();
+      if (!title) {
+        alert("שגיאה: חובה להזין כותרת לשיעור!");
+        return;
+      }
+
       const trackId = document.getElementById('lessonTrackSelect').value;
       const track = coursesData.tracks.find(t => t.id === trackId);
       if (!track) return;
 
-      const newLesson = {
-        id: "lesson-" + Date.now(),
-        title: document.getElementById('lessonTitle').value || "שיעור חדש",
-        category: document.getElementById('lessonCategory').value || "general",
+      const lessonData = {
+        id: editingLessonId || ("lesson-" + Date.now()),
+        title: title,
+        category: document.getElementById('lessonCategory').value.trim() || "general",
         videos: {
           taste: {
-            url: document.getElementById('videoTasteUrl').value,
-            desc: document.getElementById('videoTasteDesc').value
+            url: document.getElementById('videoTasteUrl').value.trim(),
+            desc: document.getElementById('videoTasteDesc').value.trim()
           },
           deep: {
-            url: document.getElementById('videoDeepUrl').value,
-            desc: document.getElementById('videoDeepDesc').value
+            url: document.getElementById('videoDeepUrl').value.trim(),
+            desc: document.getElementById('videoDeepDesc').value.trim()
           },
           expert: {
-            url: document.getElementById('videoExpertUrl').value,
-            desc: document.getElementById('videoExpertDesc').value
+            url: document.getElementById('videoExpertUrl').value.trim(),
+            desc: document.getElementById('videoExpertDesc').value.trim()
           }
         },
         cards: [
           {
-            term: document.getElementById('cardTermInput').value || "מושג",
-            def: document.getElementById('cardDefInput').value || "הסבר"
+            term: document.getElementById('cardTermInput').value.trim() || "מושג",
+            def: document.getElementById('cardDefInput').value.trim() || "הסבר"
           }
         ],
         lab: {
-          instruction: document.getElementById('labInstructionInput').value,
-          snippet: document.getElementById('labSnippetInput').value,
-          link: document.getElementById('labLinkInput').value,
+          instruction: document.getElementById('labInstructionInput').value.trim(),
+          snippet: document.getElementById('labSnippetInput').value.trim(),
+          link: document.getElementById('labLinkInput').value.trim(),
           credit: "תרגיל מומלץ למסלול"
         },
         interviewQuestions: [
           {
-            q: document.getElementById('interviewQInput').value,
-            a: document.getElementById('interviewAInput').value
+            q: document.getElementById('interviewQInput').value.trim(),
+            a: document.getElementById('interviewAInput').value.trim()
           }
         ],
-        projectIdea: document.getElementById('projectIdeaInput').value
+        projectIdea: document.getElementById('projectIdeaInput').value.trim()
       };
 
-      track.lessons.push(newLesson);
-      alert("השיעור נוסף בהצלחה למאגר הזמני! כעת לחצי על 'הורידי קובץ courses.js מעודכן' כדי לשמור את השינויים לאתר.");
+      if (editingLessonId) {
+        // עדכון שיעור קיים
+        const index = track.lessons.findIndex(l => l.id === editingLessonId);
+        if (index !== -1) {
+          track.lessons[index] = lessonData;
+          alert(`השיעור "${title}" עודכן בהצלחה! לחצי על "הורידי קובץ courses.js מעודכן" לסיום.`);
+        }
+      } else {
+        // הוספת שיעור חדש
+        track.lessons.push(lessonData);
+        alert(`השיעור "${title}" נוסף בהצלחה למסלול! לחצי על "הורידי קובץ courses.js מעודכן" לסיום.`);
+      }
+
+      onTrackChanged();
     }
 
-    // יצירת קובץ courses.js להורדה ישירה
+    function deleteLesson() {
+      if (!editingLessonId) return;
+      if (!confirm("את בטוחה שברצונך למחוק שיעור זה לצמיתות?")) return;
+
+      const trackId = document.getElementById('lessonTrackSelect').value;
+      const track = coursesData.tracks.find(t => t.id === trackId);
+      if (!track) return;
+
+      track.lessons = track.lessons.filter(l => l.id !== editingLessonId);
+      alert("השיעור נמחק בהצלחה מהמאגר הזמני! כעת הורידי את הקובץ courses.js ושמרי אותו ב-GitHub.");
+      onTrackChanged();
+    }
+
     function downloadCoursesFile() {
       const fileContent = "const coursesData = " + JSON.stringify(coursesData, null, 2) + ";";
       const blob = new Blob([fileContent], { type: "text/javascript;charset=utf-8" });
