@@ -22,7 +22,7 @@ function getUserXP() {
 
 function addXP(amount) {
   const current = getUserXP();
-  const updated = current + amount;
+  const updated = Math.max(0, current + amount); // מונע מ-XP לרדת מתחת ל-0
   localStorage.setItem('userXP', updated.toString());
   updateXPDisplay();
 }
@@ -161,6 +161,10 @@ function openLessonModal(lessonId) {
   `).join('');
 
   document.getElementById('projectIdea').innerText = activeLesson.projectIdea;
+
+  // עדכון מצב הכפתור (סיום / ביטול סיום)
+  updateCompletionButton();
+
   document.getElementById('lessonModal').classList.remove('hidden');
 }
 
@@ -171,19 +175,47 @@ function closeLessonModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-// כפתור סיום שיעור וקבלת נקודות
-function markCurrentLessonAsCompleted() {
-  if (!activeLesson) return;
+// עדכון טקסט ונראות כפתור ההשלמה במודאל
+function updateCompletionButton() {
+  const btn = document.getElementById('btnToggleCompletion');
+  if (!btn || !activeLesson) return;
+
   const completed = getCompletedLessons();
-  if (!completed.includes(activeLesson.id)) {
+  const isDone = completed.includes(activeLesson.id);
+
+  if (isDone) {
+    btn.innerText = "ביטול סימון סיום שיעור (הסרת ✓)";
+    btn.style.background = "var(--bg-card)";
+    btn.style.border = "1px solid var(--slate)";
+    btn.style.color = "var(--text-muted)";
+  } else {
+    btn.innerText = "סיימתי את השיעור בהצלחה! ✓ (+50 XP)";
+    btn.style.background = "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)";
+    btn.style.border = "1px solid var(--accent)";
+    btn.style.color = "#ffffff";
+  }
+}
+
+// כפתור חכם: מסמן כהושלם או מסיר את הסימון (כולל עדכון XP)
+function toggleLessonCompletion() {
+  if (!activeLesson) return;
+
+  let completed = getCompletedLessons();
+  const isDone = completed.includes(activeLesson.id);
+
+  if (isDone) {
+    completed = completed.filter(id => id !== activeLesson.id);
+    localStorage.setItem('completedLessons', JSON.stringify(completed));
+    addXP(-50);
+    alert("סימון השיעור הוסר (הופחתו 50 XP)");
+  } else {
     completed.push(activeLesson.id);
     localStorage.setItem('completedLessons', JSON.stringify(completed));
     addXP(50);
     alert("אלופה! סיימת את השיעור וצברת 50 XP! 🛡️⚡");
-  } else {
-    alert("שיעור זה כבר סומן כהושלם!");
   }
-  closeLessonModal();
+
+  updateCompletionButton();
   renderDuoPath(currentTrack);
 }
 
