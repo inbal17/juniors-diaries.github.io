@@ -73,7 +73,7 @@ const coursesData = {
           "cards": [
             {
               "term": "chmod 755",
-              "def": "הרשאת קריאה, כתיבה והרצה לבעלים (7), וקריאה והרצה בלבד לשאר (5)."
+              "def": "הרשאת קריאה, כתיבה והרצה לבעלים (7), והרשאות קריאה והרצה בלבד לשאר (5)."
             },
             {
               "term": "SUID Bit",
@@ -93,44 +93,6 @@ const coursesData = {
             }
           ],
           "projectIdea": "כתיבת כלי Bash שמבצע בדיקת Hardening בסיסית ומאתר קבצי SUID חריגים."
-        },
-        {
-          "id": "lesson-1789484129696",
-          "title": "שיעור חדש",
-          "category": "general",
-          "videos": {
-            "taste": {
-              "url": "",
-              "desc": ""
-            },
-            "deep": {
-              "url": "",
-              "desc": ""
-            },
-            "expert": {
-              "url": "",
-              "desc": ""
-            }
-          },
-          "cards": [
-            {
-              "term": "מושג",
-              "def": "הסבר"
-            }
-          ],
-          "lab": {
-            "instruction": "",
-            "snippet": "",
-            "link": "",
-            "credit": "תרגיל מומלץ למסלול"
-          },
-          "interviewQuestions": [
-            {
-              "q": "",
-              "a": ""
-            }
-          ],
-          "projectIdea": ""
         }
       ]
     },
