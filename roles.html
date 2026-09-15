@@ -10,6 +10,84 @@
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* באנר תשתית הבסיס הייחודי */
+    .foundations-hero-card {
+      background: linear-gradient(135deg, rgba(99, 144, 137, 0.15) 0%, rgba(20, 27, 32, 0.9) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 24px 28px;
+      margin-bottom: 36px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .foundations-hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+    }
+
+    .foundations-content {
+      max-width: 580px;
+    }
+
+    .foundations-content .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(250, 215, 186, 0.12);
+      padding: 3px 10px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .foundations-content h3 {
+      font-size: 1.5rem;
+      color: #ffffff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .foundations-content p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .btn-foundations-action {
+      background: var(--primary);
+      border: 1px solid var(--accent);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(99, 144, 137, 0.3);
+    }
+
+    .btn-foundations-action:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(250, 215, 186, 0.25);
+    }
+  </style>
 </head>
 <body>
 
@@ -35,7 +113,21 @@
       <p>לכל תפקיד בסייבר יש מיומנויות, כלים ואופי משלו. בחרי מסלול וצאי לדרך!</p>
     </div>
 
-    <!-- גריד התפקידים הדינמי -->
+    <!-- אזור הבסיס הרוחבי - מודגש ונפרד מעל התפקידים -->
+    <div class="foundations-hero-card">
+      <div class="foundations-content">
+        <span class="tag">&gt; core_prerequisite // שער הכניסה</span>
+        <h3>🧱 בסיס חובה לכל תפקידי הסייבר</h3>
+        <p>
+          חדשה בתחום או רוצה לחזק יסודות? זהו לא תפקיד אלא הידע התשתיתי שכל ג'וניורית חייבת להכיר (תקשורת, לינוקס, עקרונות אבטחה) לפני בחירת התמחות.
+        </p>
+      </div>
+      <a href="track.html?id=foundations" class="btn-foundations-action">
+        ללמידת הבסיס ←
+      </a>
+    </div>
+
+    <!-- גריד התפקידים הבלעדי (מציג רק תפקידי התמחות) -->
     <div class="roles-grid" id="rolesGridContainer"></div>
 
     <footer>
@@ -44,13 +136,13 @@
 
   </div>
 
-  <!-- פופאפ שאלת רקע -->
+  <!-- פופאפ שאלת רקע (קופץ רק בבחירת תפקיד התמחות) -->
   <div id="backgroundPromptModal" class="modal-overlay hidden">
     <div class="prompt-box">
       <div style="font-size: 2.2rem; margin-bottom: 8px;">🤔</div>
       <h3>האם יש לך רקע קודם בסייבר?</h3>
       <p>
-        כדי שתוכלי להפיק את המקסימום ממסלול <strong><span id="selectedRoleName" style="color:var(--accent);"></span></strong>, חשוב לדעת האם כבר יש לך ידע בסיסי ברשתות, תקשורת ומערכות הפעלה.
+        כדי שתוכלי להפיק את המקסימום ממסלול <strong><span id="selectedRoleName" style="color:var(--accent);"></span></strong>, חשוב לוודא שיש לך היכרות בסיסית עם תקשורת, רשתות ומערכות הפעלה.
       </p>
 
       <div class="prompt-actions">
@@ -64,7 +156,7 @@
     </div>
   </div>
 
-  <!-- קבצי נתונים וסקריפטים -->
+  <!-- סקריפטים -->
   <script src="data/courses.js"></script>
   <script src="js/app.js"></script>
   <script>
